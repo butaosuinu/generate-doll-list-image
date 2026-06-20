@@ -165,7 +165,7 @@
 ├─ main.app__main            1カラム ↔ 2カラム
 │  ├─ section.panel          左: 「写真」— DropZone / DollListEditor / すべて削除
 │  └─ section.panel          右: 「デザイン」+「出力」
-│        ├─ TemplatePicker / AspectPicker / タイトル入力
+│        ├─ TemplatePicker / AspectPicker / 名前ラベル・位置トグル
 │        ├─ PreviewCanvas
 │        └─ ExportPanel
 └─ footer.app__footer        注意書き（ブラウザ内生成・X 投稿手順）

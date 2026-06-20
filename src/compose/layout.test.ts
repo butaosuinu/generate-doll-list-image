@@ -35,16 +35,25 @@ describe("resolveGrid", () => {
     expect(g.cells[4].image.x).toBeGreaterThan(g.cells[3].image.x);
   });
 
-  it("ラベル矩形は写真の直下・同じ幅", () => {
+  it("ラベル帯は写真の下端に被さり・同じ幅（既定 bottom）", () => {
     const g = resolveGrid(1000, 1000, { ...base, columns: 2 }, 2);
     const c = g.cells[0];
     expect(c.label.x).toBeCloseTo(c.image.x);
     expect(c.label.w).toBeCloseTo(c.image.w);
-    expect(c.label.y).toBeCloseTo(c.image.y + c.image.h);
+    expect(c.label.h).toBeCloseTo(c.image.h * base.labelHeight);
+    // 帯は写真の内側下端に重なる（写真の下には突き出さない）
+    expect(c.label.y).toBeCloseTo(c.image.y + c.image.h - c.label.h);
+    expect(c.label.y + c.label.h).toBeCloseTo(c.image.y + c.image.h);
+  });
+
+  it("labelAnchor:top で帯が写真の上端に被さる", () => {
+    const g = resolveGrid(1000, 1000, { ...base, columns: 2 }, 2, "top");
+    const c = g.cells[0];
+    expect(c.label.y).toBeCloseTo(c.image.y);
     expect(c.label.h).toBeCloseTo(c.image.h * base.labelHeight);
   });
 
-  it("全セルがグリッド領域内に収まる", () => {
+  it("全セル（写真＝帯とも）がグリッド領域内に収まる", () => {
     const g = resolveGrid(1600, 900, { ...base, area: { x: 0.05, y: 0.1, w: 0.9, h: 0.8 } }, 7);
     const ax = 0.05 * 1600;
     const ay = 0.1 * 900;
@@ -54,7 +63,8 @@ describe("resolveGrid", () => {
       expect(cell.image.x).toBeGreaterThanOrEqual(ax - 0.5);
       expect(cell.image.x + cell.image.w).toBeLessThanOrEqual(ax + aw + 0.5);
       expect(cell.image.y).toBeGreaterThanOrEqual(ay - 0.5);
-      expect(cell.label.y + cell.label.h).toBeLessThanOrEqual(ay + ah + 0.5);
+      // 帯は写真内なので写真下端で領域内に収まることを確認
+      expect(cell.image.y + cell.image.h).toBeLessThanOrEqual(ay + ah + 0.5);
     }
   });
 });

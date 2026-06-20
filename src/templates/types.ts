@@ -39,7 +39,7 @@ export interface GridLayout {
   gap: number;
   /** セル内の写真の縦横比 (w / h)。 */
   cellAspect: number;
-  /** 写真下のラベル帯の高さ（写真の高さに対する比率）。 */
+  /** 写真に被せるラベル帯の高さ（写真の高さに対する比率）。 */
   labelHeight: number;
 }
 
@@ -52,15 +52,6 @@ export interface AspectVariant {
   layout?: Partial<GridLayout>;
 }
 
-export interface TitleStyle {
-  rect: NormRect;
-  style: TextStyle;
-  /** ユーザーがタイトル文言を編集できるか。 */
-  editable: boolean;
-  /** 既定のタイトル文言。 */
-  defaultText?: string;
-}
-
 export interface Template {
   id: string;
   name: string;
@@ -71,9 +62,13 @@ export interface Template {
   /** 写真セルの角丸半径（セル幅に対する比率）。 */
   cellCornerRatio?: number;
   defaultLayout: GridLayout;
+  /** 名前（主テキスト）のスタイル。 */
   defaultTextStyle: TextStyle;
+  /** 補足（従テキスト）のスタイル。未指定なら defaultTextStyle から小さめに導出。 */
+  subTextStyle?: TextStyle;
+  /** 背景ボックス表示時の帯色（半透明推奨）。未指定なら半透明の白／黒にフォールバック。 */
+  labelBoxColor?: string;
   variants: Record<AspectKey, AspectVariant>;
-  title?: TitleStyle;
 }
 
 /** 指定アスペクトで有効なレイアウトを解決（variant 上書きを default にマージ）。 */

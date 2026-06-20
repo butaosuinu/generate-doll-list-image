@@ -6,6 +6,8 @@ export const MAX_DOLLS = 24;
 export interface Doll {
   id: string;
   name: string;
+  /** 補足テキスト（型番・作家名・誕生日など。改行可）。 */
+  note: string;
   /** サムネイル <img> 用の object URL。 */
   thumbUrl: string;
   /** Canvas 合成用の読み込み済み画像。 */
@@ -19,16 +21,13 @@ function disposeDoll(doll: Doll): void {
   URL.revokeObjectURL(doll.thumbUrl);
 }
 
-function fileBaseName(file: File): string {
-  return file.name.replace(/\.[^.]+$/, "");
-}
-
 export interface UseDollList {
   dolls: Doll[];
   loading: boolean;
   addFiles: (files: FileList | File[]) => Promise<{ added: number; skipped: number }>;
   remove: (id: string) => void;
   rename: (id: string, name: string) => void;
+  setNote: (id: string, note: string) => void;
   move: (id: string, delta: -1 | 1) => void;
   clear: () => void;
 }
@@ -62,7 +61,8 @@ export function useDollList(): UseDollList {
           const image = await loadDollBitmap(file);
           loaded.push({
             id: crypto.randomUUID(),
-            name: fileBaseName(file),
+            name: "",
+            note: "",
             thumbUrl: URL.createObjectURL(file),
             image,
             focusX: 0.5,
@@ -91,6 +91,10 @@ export function useDollList(): UseDollList {
     setDolls((prev) => prev.map((d) => (d.id === id ? { ...d, name } : d)));
   }, []);
 
+  const setNote = useCallback<UseDollList["setNote"]>((id, note) => {
+    setDolls((prev) => prev.map((d) => (d.id === id ? { ...d, note } : d)));
+  }, []);
+
   const move = useCallback<UseDollList["move"]>((id, delta) => {
     setDolls((prev) => {
       const i = prev.findIndex((d) => d.id === id);
@@ -109,5 +113,5 @@ export function useDollList(): UseDollList {
     });
   }, []);
 
-  return { dolls, loading, addFiles, remove, rename, move, clear };
+  return { dolls, loading, addFiles, remove, rename, setNote, move, clear };
 }
