@@ -3,11 +3,12 @@ import type { Doll } from "../state/useDollList.ts";
 interface Props {
   dolls: Doll[];
   onRename: (id: string, name: string) => void;
+  onEditNote: (id: string, note: string) => void;
   onMove: (id: string, delta: -1 | 1) => void;
   onRemove: (id: string) => void;
 }
 
-export function DollListEditor({ dolls, onRename, onMove, onRemove }: Props) {
+export function DollListEditor({ dolls, onRename, onEditNote, onMove, onRemove }: Props) {
   if (dolls.length === 0) {
     return <p className="editor__empty">まだ写真がありません。</p>;
   }
@@ -17,15 +18,26 @@ export function DollListEditor({ dolls, onRename, onMove, onRemove }: Props) {
       {dolls.map((doll, index) => (
         <li key={doll.id} className="editor__item">
           <img className="editor__thumb" src={doll.thumbUrl} alt="" />
-          <input
-            className="editor__name"
-            type="text"
-            value={doll.name}
-            placeholder="名前"
-            aria-label={`${index + 1} 体目の名前`}
-            maxLength={40}
-            onChange={(e) => onRename(doll.id, e.target.value)}
-          />
+          <div className="editor__fields">
+            <input
+              className="editor__name"
+              type="text"
+              value={doll.name}
+              placeholder="名前"
+              aria-label={`${index + 1} 体目の名前`}
+              maxLength={40}
+              onChange={(e) => onRename(doll.id, e.target.value)}
+            />
+            <textarea
+              className="editor__note"
+              value={doll.note}
+              placeholder="補足（型番・作家名・誕生日など 改行可）"
+              aria-label={`${index + 1} 体目の補足`}
+              rows={2}
+              maxLength={120}
+              onChange={(e) => onEditNote(doll.id, e.target.value)}
+            />
+          </div>
           <div className="editor__actions">
             <button
               type="button"

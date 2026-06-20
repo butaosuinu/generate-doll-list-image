@@ -11,24 +11,25 @@ const DIMENSIONS: Record<AspectKey, { width: number; height: number; file: strin
 /**
  * 各アスペクトの variant を生成。背景画像は public/templates/<id>-<aspect>.jpg を参照し、
  * 未配置なら loadBackground が null を返して backgroundColor にフォールバックする。
- * 縦長・正方形はタイトル/余白を詰めるため area をやや広げる。
+ * タイトルを廃したぶん余白を詰め、写真が大きくなるよう area をほぼ全面に広げる
+ * （背景テンプレの装飾縁を残すため端に薄くマージンを取る）。
  */
 function makeVariants(id: string): Record<AspectKey, AspectVariant> {
   return {
     "16:9": {
       ...sizeOf("16:9"),
       background: `templates/${id}-16x9.jpg`,
-      layout: { area: { x: 0.06, y: 0.17, w: 0.88, h: 0.76 } },
+      layout: { area: { x: 0.035, y: 0.04, w: 0.93, h: 0.92 } },
     },
     "4:5": {
       ...sizeOf("4:5"),
       background: `templates/${id}-4x5.jpg`,
-      layout: { area: { x: 0.06, y: 0.13, w: 0.88, h: 0.81 } },
+      layout: { area: { x: 0.035, y: 0.03, w: 0.93, h: 0.94 } },
     },
     "1:1": {
       ...sizeOf("1:1"),
       background: `templates/${id}-1x1.jpg`,
-      layout: { area: { x: 0.06, y: 0.15, w: 0.88, h: 0.79 } },
+      layout: { area: { x: 0.035, y: 0.035, w: 0.93, h: 0.93 } },
     },
   };
 }
@@ -45,11 +46,11 @@ export const TEMPLATES: Template[] = [
     cellBorderColor: "#ffffff",
     cellCornerRatio: 0.06,
     defaultLayout: {
-      area: { x: 0.06, y: 0.17, w: 0.88, h: 0.76 },
+      area: { x: 0.035, y: 0.04, w: 0.93, h: 0.92 },
       columns: 0,
-      gap: 0.025,
+      gap: 0.014,
       cellAspect: 1,
-      labelHeight: 0.26,
+      labelHeight: 0.3,
     },
     defaultTextStyle: {
       fontFamily: '"Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
@@ -60,20 +61,7 @@ export const TEMPLATES: Template[] = [
       align: "center",
       maxLines: 2,
     },
-    title: {
-      rect: { x: 0.05, y: 0.04, w: 0.9, h: 0.1 },
-      editable: true,
-      defaultText: "My Dolls",
-      style: {
-        fontFamily: '"Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
-        fontSizeRatio: 0.06,
-        color: "#c45e86",
-        strokeColor: "#ffffff",
-        strokeRatio: 0.1,
-        align: "center",
-        maxLines: 1,
-      },
-    },
+    labelBoxColor: "rgba(255,255,255,0.66)",
     variants: makeVariants("pastel"),
   },
   {
@@ -83,11 +71,11 @@ export const TEMPLATES: Template[] = [
     cellBorderColor: "#3a3a5a",
     cellCornerRatio: 0.06,
     defaultLayout: {
-      area: { x: 0.06, y: 0.17, w: 0.88, h: 0.76 },
+      area: { x: 0.035, y: 0.04, w: 0.93, h: 0.92 },
       columns: 0,
-      gap: 0.025,
+      gap: 0.014,
       cellAspect: 1,
-      labelHeight: 0.26,
+      labelHeight: 0.3,
     },
     defaultTextStyle: {
       fontFamily: '"Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
@@ -98,20 +86,7 @@ export const TEMPLATES: Template[] = [
       align: "center",
       maxLines: 2,
     },
-    title: {
-      rect: { x: 0.05, y: 0.04, w: 0.9, h: 0.1 },
-      editable: true,
-      defaultText: "Collection",
-      style: {
-        fontFamily: '"Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
-        fontSizeRatio: 0.06,
-        color: "#9ad8ff",
-        strokeColor: "#000000",
-        strokeRatio: 0.12,
-        align: "center",
-        maxLines: 1,
-      },
-    },
+    labelBoxColor: "rgba(10,12,24,0.5)",
     variants: makeVariants("night"),
   },
   {
@@ -121,11 +96,11 @@ export const TEMPLATES: Template[] = [
     cellBorderColor: "#c7b299",
     cellCornerRatio: 0.04,
     defaultLayout: {
-      area: { x: 0.06, y: 0.17, w: 0.88, h: 0.76 },
+      area: { x: 0.035, y: 0.04, w: 0.93, h: 0.92 },
       columns: 0,
-      gap: 0.03,
+      gap: 0.014,
       cellAspect: 1,
-      labelHeight: 0.26,
+      labelHeight: 0.3,
     },
     defaultTextStyle: {
       fontFamily: '"Hiragino Mincho ProN", "Noto Serif JP", serif',
@@ -136,20 +111,7 @@ export const TEMPLATES: Template[] = [
       align: "center",
       maxLines: 2,
     },
-    title: {
-      rect: { x: 0.05, y: 0.04, w: 0.9, h: 0.1 },
-      editable: true,
-      defaultText: "ドール一覧",
-      style: {
-        fontFamily: '"Hiragino Mincho ProN", "Noto Serif JP", serif',
-        fontSizeRatio: 0.055,
-        color: "#6b4f33",
-        strokeColor: "#efe4d2",
-        strokeRatio: 0.1,
-        align: "center",
-        maxLines: 1,
-      },
-    },
+    labelBoxColor: "rgba(244,236,222,0.7)",
     variants: makeVariants("kraft"),
   },
   {
@@ -159,11 +121,11 @@ export const TEMPLATES: Template[] = [
     cellBorderColor: "#ffffff",
     cellCornerRatio: 0.04,
     defaultLayout: {
-      area: { x: 0.06, y: 0.17, w: 0.88, h: 0.76 },
+      area: { x: 0.035, y: 0.04, w: 0.93, h: 0.92 },
       columns: 0,
-      gap: 0.025,
+      gap: 0.014,
       cellAspect: 1,
-      labelHeight: 0.26,
+      labelHeight: 0.3,
     },
     defaultTextStyle: {
       fontFamily: '"Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
@@ -174,20 +136,7 @@ export const TEMPLATES: Template[] = [
       align: "center",
       maxLines: 2,
     },
-    title: {
-      rect: { x: 0.05, y: 0.04, w: 0.9, h: 0.1 },
-      editable: true,
-      defaultText: "Modern",
-      style: {
-        fontFamily: '"Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
-        fontSizeRatio: 0.06,
-        color: "#3a4453",
-        strokeColor: "#ffffff",
-        strokeRatio: 0.1,
-        align: "center",
-        maxLines: 1,
-      },
-    },
+    labelBoxColor: "rgba(255,255,255,0.68)",
     variants: makeVariants("modern"),
   },
   {
@@ -197,11 +146,11 @@ export const TEMPLATES: Template[] = [
     cellBorderColor: "#ffffff",
     cellCornerRatio: 0.06,
     defaultLayout: {
-      area: { x: 0.06, y: 0.17, w: 0.88, h: 0.76 },
+      area: { x: 0.035, y: 0.04, w: 0.93, h: 0.92 },
       columns: 0,
-      gap: 0.025,
+      gap: 0.014,
       cellAspect: 1,
-      labelHeight: 0.26,
+      labelHeight: 0.3,
     },
     defaultTextStyle: {
       fontFamily: '"Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
@@ -212,20 +161,7 @@ export const TEMPLATES: Template[] = [
       align: "center",
       maxLines: 2,
     },
-    title: {
-      rect: { x: 0.05, y: 0.04, w: 0.9, h: 0.1 },
-      editable: true,
-      defaultText: "Fresh",
-      style: {
-        fontFamily: '"Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
-        fontSizeRatio: 0.06,
-        color: "#2b86c0",
-        strokeColor: "#ffffff",
-        strokeRatio: 0.1,
-        align: "center",
-        maxLines: 1,
-      },
-    },
+    labelBoxColor: "rgba(255,255,255,0.66)",
     variants: makeVariants("aqua"),
   },
   {
@@ -235,11 +171,11 @@ export const TEMPLATES: Template[] = [
     cellBorderColor: "#cbbfa8",
     cellCornerRatio: 0.04,
     defaultLayout: {
-      area: { x: 0.06, y: 0.17, w: 0.88, h: 0.76 },
+      area: { x: 0.035, y: 0.04, w: 0.93, h: 0.92 },
       columns: 0,
-      gap: 0.03,
+      gap: 0.014,
       cellAspect: 1,
-      labelHeight: 0.26,
+      labelHeight: 0.3,
     },
     defaultTextStyle: {
       fontFamily: '"Hiragino Mincho ProN", "Noto Serif JP", serif',
@@ -250,20 +186,7 @@ export const TEMPLATES: Template[] = [
       align: "center",
       maxLines: 2,
     },
-    title: {
-      rect: { x: 0.05, y: 0.04, w: 0.9, h: 0.1 },
-      editable: true,
-      defaultText: "ドール一覧",
-      style: {
-        fontFamily: '"Hiragino Mincho ProN", "Noto Serif JP", serif',
-        fontSizeRatio: 0.055,
-        color: "#c0392b",
-        strokeColor: "#f4efe4",
-        strokeRatio: 0.1,
-        align: "center",
-        maxLines: 1,
-      },
-    },
+    labelBoxColor: "rgba(244,239,228,0.7)",
     variants: makeVariants("wamodern"),
   },
 ];

@@ -1,12 +1,19 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { AspectKey, Template } from "../templates/index.ts";
-import { drawComposition, type DollImage, type LoadedImage } from "../compose/composeImage.ts";
+import {
+  drawComposition,
+  type DollImage,
+  type LabelAnchor,
+  type LabelStyle,
+  type LoadedImage,
+} from "../compose/composeImage.ts";
 
 interface Props {
   template: Template;
   aspect: AspectKey;
   dolls: DollImage[];
-  title: string;
+  labelStyle: LabelStyle;
+  labelAnchor: LabelAnchor;
   background: LoadedImage | null;
 }
 
@@ -26,7 +33,14 @@ function useContainerWidth(): [React.RefObject<HTMLDivElement | null>, number] {
   return [ref, width];
 }
 
-export function PreviewCanvas({ template, aspect, dolls, title, background }: Props) {
+export function PreviewCanvas({
+  template,
+  aspect,
+  dolls,
+  labelStyle,
+  labelAnchor,
+  background,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [containerRef, containerWidth] = useContainerWidth();
   const labelId = useId();
@@ -48,7 +62,7 @@ export function PreviewCanvas({ template, aspect, dolls, title, background }: Pr
       if (!ctx) return;
       const scale = (displayWidth * dpr) / variant.width;
       ctx.setTransform(scale, 0, 0, scale, 0, 0);
-      drawComposition(ctx, { template, aspect, dolls, title, background });
+      drawComposition(ctx, { template, aspect, dolls, labelStyle, labelAnchor, background });
     }, 60);
 
     return () => window.clearTimeout(handle);
@@ -56,7 +70,8 @@ export function PreviewCanvas({ template, aspect, dolls, title, background }: Pr
     template,
     aspect,
     dolls,
-    title,
+    labelStyle,
+    labelAnchor,
     background,
     displayWidth,
     displayHeight,

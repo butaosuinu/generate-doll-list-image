@@ -1,8 +1,10 @@
-import type { AspectKey, Template } from "../templates/types.ts";
+import type { AspectKey, Template, TextStyle } from "../templates/types.ts";
 import { resolveLayout } from "../templates/types.ts";
 import { coverRect } from "./coverRect.ts";
-import { resolveGrid, type Rect } from "./layout.ts";
-import { drawText, type Ctx2D } from "./drawText.ts";
+import { resolveGrid, type LabelAnchor, type Rect } from "./layout.ts";
+import { drawLabel, type Ctx2D } from "./drawText.ts";
+
+export type { LabelAnchor };
 
 export interface LoadedImage {
   source: CanvasImageSource;
@@ -12,18 +14,55 @@ export interface LoadedImage {
 
 export interface DollImage extends LoadedImage {
   name: string;
+  /** 補足テキスト（改行可）。 */
+  note?: string;
   /** クロップ中心 0..1（未指定は中央）。 */
   focusX?: number;
   focusY?: number;
 }
 
+/** 名前ラベルの見せ方。box=半透明帯の上に文字 / outline=縁取り文字のみ。 */
+export type LabelStyle = "box" | "outline";
+
 export interface CompositionInput {
   template: Template;
   aspect: AspectKey;
   dolls: DollImage[];
-  title?: string;
+  /** 名前ラベルの見せ方（ユーザー設定）。 */
+  labelStyle: LabelStyle;
+  /** 名前ラベルを写真の上／下どちらに被せるか（ユーザー設定）。 */
+  labelAnchor: LabelAnchor;
   /** 読み込み済み背景画像（無ければ backgroundColor で塗りつぶし）。 */
   background: LoadedImage | null;
+}
+
+/** #rrggbb / #rgb の知覚輝度（0..1）。判定不能なら明るい寄りに倒す。 */
+function luminance(hex: string): number {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return 1;
+  const h = m[1].length === 3 ? m[1].replace(/(.)/g, "$1$1") : m[1];
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** 背景ボックス色が未指定のときのフォールバック（背景色の輝度で明＝白／暗＝黒の半透明）。 */
+function fallbackBoxColor(template: Template): string {
+  return luminance(template.backgroundColor) < 0.4
+    ? "rgba(10,12,24,0.5)"
+    : "rgba(255,255,255,0.66)";
+}
+
+/** 補足の従スタイル。テンプレに無ければ名前スタイルから小さめに導出。 */
+function resolveSubStyle(template: Template): TextStyle {
+  return (
+    template.subTextStyle ?? {
+      ...template.defaultTextStyle,
+      fontSizeRatio: template.defaultTextStyle.fontSizeRatio * 0.7,
+      maxLines: 4,
+    }
+  );
 }
 
 export type OutputFormat = "png" | "jpeg";
@@ -45,7 +84,7 @@ export async function composeToBlob(
  * プレビューは呼び出し側が ctx に拡大変換を掛けて同じ関数を使う。
  */
 export function drawComposition(ctx: Ctx2D, input: CompositionInput): void {
-  const { template, aspect, dolls, background } = input;
+  const { template, aspect, dolls, background, labelStyle, labelAnchor } = input;
   const variant = template.variants[aspect];
   const W = variant.width;
   const H = variant.height;
@@ -60,15 +99,11 @@ export function drawComposition(ctx: Ctx2D, input: CompositionInput): void {
   }
   ctx.restore();
 
-  // 2. タイトル
-  if (template.title) {
-    const text = input.title ?? template.title.defaultText ?? "";
-    drawText(ctx, text, normToPx(template.title.rect, W, H), template.title.style, H);
-  }
-
-  // 3. 写真グリッド + 名前
+  // 2. 写真グリッド + 名前（写真に被せる）
   const layout = resolveLayout(template, aspect);
-  const grid = resolveGrid(W, H, layout, dolls.length);
+  const grid = resolveGrid(W, H, layout, dolls.length, labelAnchor);
+  const subStyle = resolveSubStyle(template);
+  const boxColor = template.labelBoxColor ?? fallbackBoxColor(template);
 
   grid.cells.forEach((cell, i) => {
     const doll = dolls[i];
@@ -110,17 +145,20 @@ export function drawComposition(ctx: Ctx2D, input: CompositionInput): void {
       ctx.restore();
     }
 
-    // 名前
-    drawText(ctx, doll.name, cell.label, template.defaultTextStyle, H);
+    // 名前 + 補足（写真の角丸内にクリップして帯／文字を被せる）
+    const note = doll.note ?? "";
+    if (doll.name.trim() || note.trim()) {
+      ctx.save();
+      roundRectPath(ctx, cell.image, r);
+      ctx.clip();
+      if (labelStyle === "box") {
+        ctx.fillStyle = boxColor;
+        ctx.fillRect(cell.label.x, cell.label.y, cell.label.w, cell.label.h);
+      }
+      drawLabel(ctx, { name: doll.name, note }, cell.label, template.defaultTextStyle, subStyle, H);
+      ctx.restore();
+    }
   });
-}
-
-function normToPx(
-  rect: { x: number; y: number; w: number; h: number },
-  W: number,
-  H: number,
-): Rect {
-  return { x: rect.x * W, y: rect.y * H, w: rect.w * W, h: rect.h * H };
 }
 
 /** roundRect 非対応環境でも動くよう arcTo でパスを引く。 */

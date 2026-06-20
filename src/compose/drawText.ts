@@ -4,6 +4,8 @@ import type { Rect } from "./layout.ts";
 export type Ctx2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
 const LINE_HEIGHT_FACTOR = 1.18;
+/** 名前と補足の間隔（補足フォントサイズに対する比率）。 */
+const NAME_NOTE_GAP_FACTOR = 0.25;
 
 /**
  * 矩形 (maxWidth) に収まるよう text を折り返す。日本語は文字単位、半角スペースでも
@@ -60,51 +62,103 @@ export function wrapText(
   return lines;
 }
 
-/**
- * 矩形内に折り返し・縁取り・整列を適用してテキストを描画する。
- * フォントサイズは「キャンバス高さ比率」と「行数が帯に収まる上限」の小さい方。
- */
-export function drawText(
+function alignX(rect: Rect, align: TextStyle["align"]): number {
+  if (align === "left") return rect.x;
+  if (align === "right") return rect.x + rect.w;
+  return rect.x + rect.w / 2;
+}
+
+/** 縁取り → 塗りの順で 1 行を描く。ctx.font / textBaseline / textAlign は呼び出し側で設定済み。 */
+function drawStyledLine(
   ctx: Ctx2D,
-  text: string,
-  rect: Rect,
+  line: string,
+  x: number,
+  y: number,
+  fontSizePx: number,
   style: TextStyle,
+): void {
+  const strokeWidth = (style.strokeRatio ?? 0) * fontSizePx;
+  if (style.strokeColor && strokeWidth > 0) {
+    ctx.lineJoin = "round";
+    ctx.lineWidth = strokeWidth;
+    ctx.strokeStyle = style.strokeColor;
+    ctx.strokeText(line, x, y);
+  }
+  ctx.fillStyle = style.color;
+  ctx.fillText(line, x, y);
+}
+
+export interface LabelContent {
+  name: string;
+  note: string;
+}
+
+/**
+ * 名前（主）＋補足（従・改行可）を 1 つの帯 (rect) に縦積みで描画する。
+ * それぞれ wrapText で折り返し、合計ブロック高が rect.h を超える場合は両者を同率で
+ * 縮小して収める。rect 内で縦中央寄せし、各スタイルの整列・縁取りで描く。
+ */
+export function drawLabel(
+  ctx: Ctx2D,
+  content: LabelContent,
+  rect: Rect,
+  primary: TextStyle,
+  secondary: TextStyle,
   canvasH: number,
 ): void {
-  const trimmed = text.trim();
-  if (!trimmed) return;
+  const name = content.name.trim();
+  const note = content.note.trim();
+  if (!name && !note) return;
 
-  const maxByBand = rect.h / (style.maxLines * LINE_HEIGHT_FACTOR);
-  const fontSizePx = Math.max(1, Math.min(style.fontSizeRatio * canvasH, maxByBand));
-  const lineHeight = fontSizePx * LINE_HEIGHT_FACTOR;
+  let fontP = Math.max(1, primary.fontSizeRatio * canvasH);
+  let fontS = Math.max(1, secondary.fontSizeRatio * canvasH);
 
   ctx.save();
-  ctx.font = `${fontSizePx}px ${style.fontFamily}`;
-  ctx.textBaseline = "middle";
-  ctx.textAlign = style.align;
 
-  const lines = wrapText(ctx, trimmed, rect.w, style.maxLines);
-  const blockH = lines.length * lineHeight;
-  let y = rect.y + (rect.h - blockH) / 2 + lineHeight / 2;
+  ctx.font = `${fontP}px ${primary.fontFamily}`;
+  const nameLines = name ? wrapText(ctx, name, rect.w, primary.maxLines) : [];
+  ctx.font = `${fontS}px ${secondary.fontFamily}`;
+  const noteLines = note ? wrapText(ctx, note, rect.w, secondary.maxLines) : [];
 
-  const x =
-    style.align === "left"
-      ? rect.x
-      : style.align === "right"
-        ? rect.x + rect.w
-        : rect.x + rect.w / 2;
+  const measureTotal = (fp: number, fs: number, g: number) =>
+    nameLines.length * fp * LINE_HEIGHT_FACTOR + g + noteLines.length * fs * LINE_HEIGHT_FACTOR;
 
-  const strokeWidth = (style.strokeRatio ?? 0) * fontSizePx;
-  for (const line of lines) {
-    if (style.strokeColor && strokeWidth > 0) {
-      ctx.lineJoin = "round";
-      ctx.lineWidth = strokeWidth;
-      ctx.strokeStyle = style.strokeColor;
-      ctx.strokeText(line, x, y);
-    }
-    ctx.fillStyle = style.color;
-    ctx.fillText(line, x, y);
-    y += lineHeight;
+  let gap = nameLines.length && noteLines.length ? fontS * NAME_NOTE_GAP_FACTOR : 0;
+  let total = measureTotal(fontP, fontS, gap);
+
+  // 帯に収まらない場合は主従とも同率で縮小（折り返しは大きいフォント基準なので幅は安全）。
+  // 縮小後も 1px を下限に保ち、極端な過密でも 0px 化しないようにする。
+  if (total > rect.h) {
+    const s = rect.h / total;
+    fontP = Math.max(1, fontP * s);
+    fontS = Math.max(1, fontS * s);
+    gap *= s;
+    total = measureTotal(fontP, fontS, gap);
   }
+
+  // 各行を行ボックスの中央に描く（middle 基準）。ブロックを rect 内で縦中央寄せ。
+  ctx.textBaseline = "middle";
+  let y = rect.y + (rect.h - total) / 2;
+
+  const lineHeightP = fontP * LINE_HEIGHT_FACTOR;
+  ctx.font = `${fontP}px ${primary.fontFamily}`;
+  ctx.textAlign = primary.align;
+  const xP = alignX(rect, primary.align);
+  for (const line of nameLines) {
+    drawStyledLine(ctx, line, xP, y + lineHeightP / 2, fontP, primary);
+    y += lineHeightP;
+  }
+
+  y += gap;
+
+  const lineHeightS = fontS * LINE_HEIGHT_FACTOR;
+  ctx.font = `${fontS}px ${secondary.fontFamily}`;
+  ctx.textAlign = secondary.align;
+  const xS = alignX(rect, secondary.align);
+  for (const line of noteLines) {
+    drawStyledLine(ctx, line, xS, y + lineHeightS / 2, fontS, secondary);
+    y += lineHeightS;
+  }
+
   ctx.restore();
 }

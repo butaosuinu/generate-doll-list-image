@@ -3,6 +3,8 @@ import { DEFAULT_TEMPLATE_ID, getTemplate, type AspectKey } from "./templates/in
 import {
   composeToBlob,
   type DollImage,
+  type LabelAnchor,
+  type LabelStyle,
   type LoadedImage,
   type OutputFormat,
 } from "./compose/composeImage.ts";
@@ -12,19 +14,30 @@ import { DropZone } from "./components/DropZone.tsx";
 import { DollListEditor } from "./components/DollListEditor.tsx";
 import { TemplatePicker } from "./components/TemplatePicker.tsx";
 import { AspectPicker } from "./components/AspectPicker.tsx";
+import { SegmentedPicker } from "./components/SegmentedPicker.tsx";
 import { PreviewCanvas } from "./components/PreviewCanvas.tsx";
 import { ExportPanel } from "./components/ExportPanel.tsx";
 import { PrivacyNote } from "./components/PrivacyNote.tsx";
 
+const LABEL_STYLE_OPTIONS = [
+  { value: "box", label: "背景ボックス" },
+  { value: "outline", label: "縁取りのみ" },
+] as const satisfies readonly { value: LabelStyle; label: string }[];
+
+const LABEL_ANCHOR_OPTIONS = [
+  { value: "bottom", label: "下" },
+  { value: "top", label: "上" },
+] as const satisfies readonly { value: LabelAnchor; label: string }[];
+
 export default function App() {
-  const { dolls, loading, addFiles, remove, rename, move, clear } = useDollList();
+  const { dolls, loading, addFiles, remove, rename, setNote, move, clear } = useDollList();
   const [templateId, setTemplateId] = useState(DEFAULT_TEMPLATE_ID);
   const [aspect, setAspect] = useState<AspectKey>("16:9");
-  const [title, setTitle] = useState("");
+  const [labelStyle, setLabelStyle] = useState<LabelStyle>("box");
+  const [labelAnchor, setLabelAnchor] = useState<LabelAnchor>("bottom");
   const [background, setBackground] = useState<LoadedImage | null>(null);
 
   const template = useMemo(() => getTemplate(templateId), [templateId]);
-  const titleText = title.trim() || template.title?.defaultText || "";
 
   // テンプレ／アスペクト変更時に背景を読み込む
   useEffect(() => {
@@ -48,6 +61,7 @@ export default function App() {
         width: d.image.width,
         height: d.image.height,
         name: d.name,
+        note: d.note,
         focusX: d.focusX,
         focusY: d.focusY,
       })),
@@ -60,7 +74,7 @@ export default function App() {
     const path = template.variants[aspect].background;
     const bg = path ? await loadBackground(path) : null;
     return composeToBlob(
-      { template, aspect, dolls: dollImages, title: titleText, background: bg },
+      { template, aspect, dolls: dollImages, labelStyle, labelAnchor, background: bg },
       format,
     );
   };
@@ -82,7 +96,13 @@ export default function App() {
             hint={`${dolls.length} / ${MAX_DOLLS} 体`}
           />
           {loading && <p className="panel__note">読み込み中…</p>}
-          <DollListEditor dolls={dolls} onRename={rename} onMove={move} onRemove={remove} />
+          <DollListEditor
+            dolls={dolls}
+            onRename={rename}
+            onEditNote={setNote}
+            onMove={move}
+            onRemove={remove}
+          />
           {dolls.length > 0 && (
             <button type="button" className="panel__clear" onClick={clear}>
               すべて削除
@@ -99,24 +119,28 @@ export default function App() {
           <label className="panel__label">アスペクト比</label>
           <AspectPicker selected={aspect} onSelect={setAspect} />
 
-          {template.title?.editable && (
-            <label className="panel__field">
-              タイトル
-              <input
-                type="text"
-                value={title}
-                placeholder={template.title.defaultText ?? ""}
-                maxLength={30}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </label>
-          )}
+          <label className="panel__label">名前ラベル</label>
+          <SegmentedPicker
+            ariaLabel="名前ラベルの見せ方"
+            options={LABEL_STYLE_OPTIONS}
+            selected={labelStyle}
+            onSelect={setLabelStyle}
+          />
+
+          <label className="panel__label">名前の位置</label>
+          <SegmentedPicker
+            ariaLabel="名前ラベルを被せる位置"
+            options={LABEL_ANCHOR_OPTIONS}
+            selected={labelAnchor}
+            onSelect={setLabelAnchor}
+          />
 
           <PreviewCanvas
             template={template}
             aspect={aspect}
             dolls={dollImages}
-            title={titleText}
+            labelStyle={labelStyle}
+            labelAnchor={labelAnchor}
             background={background}
           />
 

@@ -1,5 +1,8 @@
 import type { GridLayout } from "../templates/types.ts";
 
+/** 名前ラベルを写真のどちら側に被せるか（ユーザー設定）。 */
+export type LabelAnchor = "top" | "bottom";
+
 export interface Rect {
   x: number;
   y: number;
@@ -76,6 +79,7 @@ export function autoColumns(
 
 /**
  * キャンバス (W×H) 上に、写真＋ラベルのグリッドを配置する。
+ * 写真はセル全体を占め、名前ラベルは写真の上端／下端に被せる帯として配置する。
  * 各セルは領域内で中央寄せされ、最後の行に欠けがある場合はその行も中央寄せする。
  */
 export function resolveGrid(
@@ -83,6 +87,7 @@ export function resolveGrid(
   canvasH: number,
   layout: GridLayout,
   count: number,
+  labelAnchor: LabelAnchor = "bottom",
 ): GridResult {
   if (count <= 0) return { columns: 0, rows: 0, cells: [] };
 
@@ -94,24 +99,18 @@ export function resolveGrid(
   };
   const gapPx = layout.gap * area.w;
 
+  // ラベルは写真に被せる（帯ぶんの高さを別に確保しない）ため、サイズ計算は labelHeight=0。
   const columns =
     layout.columns > 0
       ? Math.min(layout.columns, count)
-      : autoColumns(area.w, area.h, gapPx, layout.cellAspect, layout.labelHeight, count);
+      : autoColumns(area.w, area.h, gapPx, layout.cellAspect, 0, count);
   const rows = Math.ceil(count / columns);
 
-  const cellW = cellWidthFor(
-    area.w,
-    area.h,
-    gapPx,
-    layout.cellAspect,
-    layout.labelHeight,
-    count,
-    columns,
-  );
+  const cellW = cellWidthFor(area.w, area.h, gapPx, layout.cellAspect, 0, count, columns);
   const imageH = cellW / layout.cellAspect;
   const labelBandH = imageH * layout.labelHeight;
-  const cellTotalH = imageH + labelBandH;
+  const cellTotalH = imageH;
+  const anchorTop = labelAnchor === "top";
 
   const gridH = rows * cellTotalH + (rows - 1) * gapPx;
   const gridStartY = area.y + (area.h - gridH) / 2;
@@ -129,7 +128,7 @@ export function resolveGrid(
 
     cells.push({
       image: { x, y, w: cellW, h: imageH },
-      label: { x, y: y + imageH, w: cellW, h: labelBandH },
+      label: { x, y: anchorTop ? y : y + imageH - labelBandH, w: cellW, h: labelBandH },
     });
   }
 
