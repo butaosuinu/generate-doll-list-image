@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { analyzeFocus } from "../image/autoFocus.ts";
 import { loadDollBitmap, type LoadedBitmap } from "../image/loadImage.ts";
 
 export const MAX_DOLLS = 24;
@@ -28,6 +29,8 @@ export interface UseDollList {
   remove: (id: string) => void;
   rename: (id: string, name: string) => void;
   setNote: (id: string, note: string) => void;
+  /** 切り抜き中心 0..1 を更新する（自動推定値の手動微調整）。 */
+  setFocus: (id: string, focusX: number, focusY: number) => void;
   move: (id: string, delta: -1 | 1) => void;
   clear: () => void;
 }
@@ -59,14 +62,16 @@ export function useDollList(): UseDollList {
       for (const file of accepted) {
         try {
           const image = await loadDollBitmap(file);
+          // 画像解析でバストアップに自動で寄せる（失敗時は中央のまま）
+          const focus = await analyzeFocus(image.source, image.width, image.height);
           loaded.push({
             id: crypto.randomUUID(),
             name: "",
             note: "",
             thumbUrl: URL.createObjectURL(file),
             image,
-            focusX: 0.5,
-            focusY: 0.5,
+            focusX: focus.focusX,
+            focusY: focus.focusY,
           });
         } catch {
           // 読み込めない画像はスキップ
@@ -95,6 +100,12 @@ export function useDollList(): UseDollList {
     setDolls((prev) => prev.map((d) => (d.id === id ? { ...d, note } : d)));
   }, []);
 
+  const setFocus = useCallback<UseDollList["setFocus"]>((id, focusX, focusY) => {
+    const fx = Math.min(1, Math.max(0, focusX));
+    const fy = Math.min(1, Math.max(0, focusY));
+    setDolls((prev) => prev.map((d) => (d.id === id ? { ...d, focusX: fx, focusY: fy } : d)));
+  }, []);
+
   const move = useCallback<UseDollList["move"]>((id, delta) => {
     setDolls((prev) => {
       const i = prev.findIndex((d) => d.id === id);
@@ -113,5 +124,5 @@ export function useDollList(): UseDollList {
     });
   }, []);
 
-  return { dolls, loading, addFiles, remove, rename, setNote, move, clear };
+  return { dolls, loading, addFiles, remove, rename, setNote, setFocus, move, clear };
 }

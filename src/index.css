@@ -376,16 +376,58 @@ button:disabled {
   transform: translateX(3px);
 }
 
-.editor__thumb {
-  width: 50px;
-  height: 50px;
+.focus-thumb-wrap {
   flex-shrink: 0;
-  border-radius: 14px;
-  object-fit: cover;
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 写真全体を表示し、切り抜き範囲（正方形枠）をドラッグで動かせるサムネイル */
+.focus-thumb {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
   background: rgba(255, 255, 255, 0.5);
   box-shadow:
     0 0 0 3px #fff,
     0 6px 14px -4px rgba(255, 126, 176, 0.45);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.focus-thumb:active {
+  cursor: grabbing;
+}
+/* 正方形/ほぼ正方形で調整余地が無いときは操作可能に見せない */
+.focus-thumb--static,
+.focus-thumb--static:active {
+  cursor: default;
+}
+
+.focus-thumb__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* 採用範囲の枠。box-shadow で枠外を暗くする（親の overflow:hidden で切り取り） */
+.focus-thumb__frame {
+  position: absolute;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.focus-thumb__range {
+  width: 100%;
+  accent-color: var(--coral);
+  cursor: pointer;
 }
 
 .editor__name {
