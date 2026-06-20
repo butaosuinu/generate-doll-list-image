@@ -30,7 +30,8 @@ const LABEL_ANCHOR_OPTIONS = [
 ] as const satisfies readonly { value: LabelAnchor; label: string }[];
 
 export default function App() {
-  const { dolls, loading, addFiles, remove, rename, setNote, move, clear } = useDollList();
+  const { dolls, loading, addFiles, remove, rename, setNote, setFocus, move, clear } =
+    useDollList();
   const [templateId, setTemplateId] = useState(DEFAULT_TEMPLATE_ID);
   const [aspect, setAspect] = useState<AspectKey>("16:9");
   const [labelStyle, setLabelStyle] = useState<LabelStyle>("box");
@@ -100,6 +101,7 @@ export default function App() {
             dolls={dolls}
             onRename={rename}
             onEditNote={setNote}
+            onSetFocus={setFocus}
             onMove={move}
             onRemove={remove}
           />

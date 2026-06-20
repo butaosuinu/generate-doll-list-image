@@ -1,14 +1,23 @@
 import type { Doll } from "../state/useDollList.ts";
+import { FocusThumb } from "./FocusThumb.tsx";
 
 interface Props {
   dolls: Doll[];
   onRename: (id: string, name: string) => void;
   onEditNote: (id: string, note: string) => void;
+  onSetFocus: (id: string, focusX: number, focusY: number) => void;
   onMove: (id: string, delta: -1 | 1) => void;
   onRemove: (id: string) => void;
 }
 
-export function DollListEditor({ dolls, onRename, onEditNote, onMove, onRemove }: Props) {
+export function DollListEditor({
+  dolls,
+  onRename,
+  onEditNote,
+  onSetFocus,
+  onMove,
+  onRemove,
+}: Props) {
   if (dolls.length === 0) {
     return <p className="editor__empty">まだ写真がありません。</p>;
   }
@@ -17,7 +26,15 @@ export function DollListEditor({ dolls, onRename, onEditNote, onMove, onRemove }
     <ul className="editor">
       {dolls.map((doll, index) => (
         <li key={doll.id} className="editor__item">
-          <img className="editor__thumb" src={doll.thumbUrl} alt="" />
+          <FocusThumb
+            src={doll.thumbUrl}
+            width={doll.image.width}
+            height={doll.image.height}
+            focusX={doll.focusX}
+            focusY={doll.focusY}
+            label={`${index + 1} 体目`}
+            onChange={(fx, fy) => onSetFocus(doll.id, fx, fy)}
+          />
           <div className="editor__fields">
             <input
               className="editor__name"
