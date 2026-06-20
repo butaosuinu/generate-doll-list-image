@@ -113,6 +113,21 @@ describe("drawLabel", () => {
     expect(notePx).toBeLessThan(namePx);
   });
 
+  it("縮小後に折り返し直し、実サイズなら収まる行を … で切らない", () => {
+    const ctx = mockCtx();
+    // 初期フォントが大きく rect.w 狭いと 2 行＋… になるが、帯が低く縮小されれば 1 行で収まる
+    drawLabel(
+      ctx,
+      { name: "", note: "ABCDEFGHIJ" },
+      { x: 0, y: 0, w: 120, h: 30 },
+      style(),
+      style({ fontSizeRatio: 0.1, maxLines: 2 }),
+      1000,
+    );
+    expect(ctx.fills.some((f) => f.text.includes("…"))).toBe(false);
+    expect(ctx.fills.some((f) => f.text === "ABCDEFGHIJ")).toBe(true);
+  });
+
   it("帯が極端に狭くてもフォントは 1px を下回らない（floor）", () => {
     const ctx = mockCtx();
     drawLabel(

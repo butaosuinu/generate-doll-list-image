@@ -115,10 +115,15 @@ export function drawLabel(
 
   ctx.save();
 
-  ctx.font = `${fontP}px ${primary.fontFamily}`;
-  const nameLines = name ? wrapText(ctx, name, rect.w, primary.maxLines) : [];
-  ctx.font = `${fontS}px ${secondary.fontFamily}`;
-  const noteLines = note ? wrapText(ctx, note, rect.w, secondary.maxLines) : [];
+  const wrapAt = () => {
+    ctx.font = `${fontP}px ${primary.fontFamily}`;
+    nameLines = name ? wrapText(ctx, name, rect.w, primary.maxLines) : [];
+    ctx.font = `${fontS}px ${secondary.fontFamily}`;
+    noteLines = note ? wrapText(ctx, note, rect.w, secondary.maxLines) : [];
+  };
+  let nameLines: string[] = [];
+  let noteLines: string[] = [];
+  wrapAt();
 
   const measureTotal = (fp: number, fs: number, g: number) =>
     nameLines.length * fp * LINE_HEIGHT_FACTOR + g + noteLines.length * fs * LINE_HEIGHT_FACTOR;
@@ -126,13 +131,15 @@ export function drawLabel(
   let gap = nameLines.length && noteLines.length ? fontS * NAME_NOTE_GAP_FACTOR : 0;
   let total = measureTotal(fontP, fontS, gap);
 
-  // 帯に収まらない場合は主従とも同率で縮小（折り返しは大きいフォント基準なので幅は安全）。
-  // 縮小後も 1px を下限に保ち、極端な過密でも 0px 化しないようにする。
+  // 帯に収まらない場合は主従とも同率で縮小。縮小後も 1px を下限に保ち、極端な過密でも
+  // 0px 化しないようにする。縮小後のフォントで折り返し直し、大きいフォント基準の
+  // 不要な … 省略（実サイズなら収まる行が切られる）を避ける。
   if (total > rect.h) {
     const s = rect.h / total;
     fontP = Math.max(1, fontP * s);
     fontS = Math.max(1, fontS * s);
     gap *= s;
+    wrapAt();
     total = measureTotal(fontP, fontS, gap);
   }
 
