@@ -1,10 +1,43 @@
+/* =====================================================================
+   Soft Glow Kawaii — 暖色オーロラ × グラスモーフィズム × 丸ゴシック
+   マークアップ (BEM class) は据え置き、スタイルのみで刷新。
+   ===================================================================== */
+
 :root {
-  font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
-  line-height: 1.6;
-  color: #1f2933;
-  background-color: #f5f7fa;
-  --accent: #c45e86;
-  --border: #dfe3e8;
+  /* text */
+  --ink: #6a4658;
+  --ink-2: #9b7385;
+  --ink-3: #bb9caa;
+  /* brand */
+  --coral: #ff7eb0;
+  --coral-deep: #ef5d99;
+  --coral-tint: rgba(255, 126, 176, 0.14);
+  --peach: #ff9e7a;
+  --lav: #b79bff;
+  /* glass surfaces */
+  --glass: rgba(255, 255, 255, 0.56);
+  --glass-strong: rgba(255, 255, 255, 0.74);
+  --glass-border: rgba(255, 255, 255, 0.72);
+  --field: rgba(255, 255, 255, 0.62);
+  /* status */
+  --green: #2f9e6f;
+  --danger: #e8537e;
+  /* shape */
+  --radius: 26px;
+  --radius-sm: 16px;
+  --radius-xs: 13px;
+  --shadow: 0 10px 32px rgba(220, 120, 165, 0.2);
+  --shadow-pop: 0 18px 44px rgba(220, 110, 160, 0.3);
+  /* type */
+  --round: "Zen Maru Gothic", system-ui, sans-serif;
+  --quick: "Quicksand", "Zen Maru Gothic", system-ui, sans-serif;
+  /* motion */
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  font-family: var(--round);
+  line-height: 1.65;
+  color: var(--ink);
 }
 
 * {
@@ -14,53 +47,95 @@
 body {
   margin: 0;
   min-height: 100vh;
+  color: var(--ink);
+  background-color: #ffe7da;
+  background-image:
+    radial-gradient(60% 50% at 12% 0%, rgba(255, 209, 227, 0.95), transparent 60%),
+    radial-gradient(55% 55% at 92% 8%, rgba(255, 198, 168, 0.9), transparent 62%),
+    radial-gradient(70% 60% at 78% 100%, rgba(183, 155, 255, 0.55), transparent 60%),
+    radial-gradient(60% 60% at 20% 95%, rgba(255, 158, 122, 0.5), transparent 60%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ふんわりグレイン */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 button {
   font: inherit;
   cursor: pointer;
 }
-
 button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
 .app {
-  max-width: 1100px;
+  position: relative;
+  z-index: 1;
+  max-width: 1140px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 48px 18px 64px;
 }
 
+/* ---------- Header ---------- */
 .app__header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 40px;
 }
 
 .app__header h1 {
-  margin: 0 0 4px;
-  font-size: clamp(1.4rem, 4vw, 2rem);
+  margin: 0 0 6px;
+  font-family: var(--round);
+  font-weight: 900;
+  font-size: clamp(1.9rem, 5.2vw, 3.1rem);
+  line-height: 1.14;
+  letter-spacing: 0.01em;
+  background: linear-gradient(120deg, var(--coral-deep), var(--peach) 58%, var(--lav));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--coral-deep); /* clip 非対応時のフォールバック */
 }
 
 .app__sub {
-  margin: 0 0 8px;
-  color: #52606d;
+  margin: 0 auto 16px;
+  max-width: 30em;
+  color: var(--ink-2);
+  font-weight: 500;
 }
 
 .privacy {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   margin: 0;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  background: #eaf6ee;
-  color: #1f6b3a;
+  padding: 8px 18px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--glass-strong);
+  border: 1px solid rgba(47, 158, 111, 0.24);
   border-radius: 999px;
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
+/* ---------- Layout ---------- */
 .app__main {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 22px;
 }
 
 @media (min-width: 880px) {
@@ -71,261 +146,485 @@ button:disabled {
 }
 
 .panel {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  position: relative;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  backdrop-filter: blur(22px) saturate(1.4);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 24px 22px;
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .panel__title {
-  margin: 0 0 12px;
-  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 0 16px;
+  font-family: var(--round);
+  font-weight: 900;
+  font-size: 1.4rem;
+  color: var(--ink);
 }
-
+.panel__title::before {
+  content: "";
+  width: 9px;
+  height: 22px;
+  border-radius: 5px;
+  background: linear-gradient(160deg, var(--coral), var(--peach));
+  box-shadow: 0 4px 10px -3px rgba(255, 126, 176, 0.7);
+}
 .panel__title:not(:first-child) {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1.5px dashed rgba(255, 158, 200, 0.45);
 }
 
 .panel__label {
   display: block;
-  margin: 12px 0 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #52606d;
+  margin: 20px 0 9px;
+  font-family: var(--quick);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
 }
 
+/* 共通: ラベル付きフィールド */
 .panel__field,
 .export__field {
   display: block;
-  margin: 12px 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #52606d;
+  margin: 20px 0 0;
+  font-family: var(--quick);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-2);
 }
 
 .panel__field input,
 .export__field textarea {
   display: block;
   width: 100%;
-  margin-top: 6px;
-  padding: 8px 10px;
-  font: inherit;
-  font-weight: 400;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  margin-top: 9px;
+  padding: 12px 15px;
+  font-family: var(--round);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--field);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color 0.16s var(--ease),
+    box-shadow 0.16s var(--ease),
+    background 0.16s var(--ease);
+}
+.panel__field input::placeholder,
+.export__field textarea::placeholder {
+  color: var(--ink-3);
+}
+.panel__field input:focus,
+.export__field textarea:focus {
+  outline: none;
+  border-color: var(--coral);
+  background: #fff;
+  box-shadow: 0 0 0 4px var(--coral-tint);
+}
+.export__field textarea {
+  resize: vertical;
+  min-height: 62px;
 }
 
 .panel__note {
-  color: #52606d;
+  margin: 12px 0 0;
+  color: var(--ink-2);
   font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .panel__clear {
-  margin-top: 12px;
-  padding: 6px 12px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: #b91c1c;
-}
-
-/* DropZone */
-.dropzone {
-  border: 2px dashed var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
+  margin-top: 16px;
+  padding: 10px 18px;
+  font-family: var(--quick);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--danger);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid rgba(232, 83, 126, 0.3);
+  border-radius: 999px;
   transition:
-    border-color 0.15s,
-    background 0.15s;
+    background 0.16s var(--ease),
+    border-color 0.16s var(--ease),
+    transform 0.2s var(--spring);
+}
+.panel__clear:hover {
+  background: rgba(255, 230, 238, 0.85);
+  border-color: rgba(232, 83, 126, 0.5);
+  transform: translateY(-1px);
 }
 
+/* ---------- DropZone ---------- */
+.dropzone {
+  border: 2px dashed rgba(255, 145, 190, 0.6);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.4);
+  transition:
+    border-color 0.2s var(--ease),
+    background 0.2s var(--ease),
+    transform 0.2s var(--spring);
+}
+.dropzone:hover {
+  border-color: var(--coral);
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.01);
+}
 .dropzone--over {
-  border-color: var(--accent);
-  background: #fdf2f7;
+  border-color: var(--coral);
+  border-style: solid;
+  background: rgba(255, 230, 240, 0.7);
+  transform: scale(1.012);
 }
-
 .dropzone--disabled {
   opacity: 0.6;
 }
+.dropzone--disabled:hover {
+  transform: none;
+  border-color: rgba(255, 145, 190, 0.6);
+  background: rgba(255, 255, 255, 0.4);
+}
 
 .dropzone__button {
-  padding: 10px 20px;
-  background: var(--accent);
+  font-family: var(--quick);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 13px 30px;
   color: #fff;
+  background: linear-gradient(135deg, var(--coral), var(--peach));
   border: none;
   border-radius: 999px;
-  font-weight: 600;
+  box-shadow: 0 12px 24px -8px rgba(255, 126, 176, 0.8);
+  transition:
+    transform 0.28s var(--spring),
+    box-shadow 0.2s var(--ease),
+    filter 0.2s var(--ease);
+}
+.dropzone__button:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.04);
+  filter: brightness(1.05);
+  box-shadow: 0 18px 30px -8px rgba(255, 126, 176, 0.85);
+}
+.dropzone__button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
 .dropzone__text {
-  margin: 10px 0 0;
-  font-size: 0.85rem;
-  color: #52606d;
+  margin: 14px 0 0;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink-2);
 }
-
 .dropzone__hint {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
-  color: #7b8794;
+  margin: 6px 0 0;
+  font-family: var(--quick);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--coral-deep);
 }
 
-/* Editor */
+/* ---------- Editor ---------- */
 .editor {
   list-style: none;
   margin: 16px 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .editor__empty {
   margin: 16px 0 0;
-  color: #7b8794;
+  padding: 18px;
+  text-align: center;
+  color: var(--ink-3);
   font-size: 0.9rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1.5px dashed rgba(255, 158, 200, 0.4);
+  border-radius: var(--radius-sm);
 }
 
 .editor__item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.42);
+  border: 1.5px solid transparent;
+  transition:
+    background 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    transform 0.2s var(--spring);
+}
+.editor__item:hover {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: var(--glass-border);
+  transform: translateX(3px);
 }
 
 .editor__thumb {
-  width: 44px;
-  height: 44px;
-  object-fit: cover;
-  border-radius: 8px;
+  width: 50px;
+  height: 50px;
   flex-shrink: 0;
-  background: #eef1f4;
+  border-radius: 14px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 6px 14px -4px rgba(255, 126, 176, 0.45);
 }
 
 .editor__name {
   flex: 1;
   min-width: 0;
-  padding: 6px 8px;
+  padding: 10px 14px;
   font: inherit;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--field);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 14px;
+  transition:
+    border-color 0.16s var(--ease),
+    box-shadow 0.16s var(--ease),
+    background 0.16s var(--ease);
+}
+.editor__name::placeholder {
+  color: var(--ink-3);
+}
+.editor__name:focus {
+  outline: none;
+  border-color: var(--coral);
+  background: #fff;
+  box-shadow: 0 0 0 4px var(--coral-tint);
 }
 
 .editor__actions {
   display: flex;
-  gap: 2px;
+  gap: 5px;
 }
-
 .editor__actions button {
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--border);
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  transition:
+    background 0.16s var(--ease),
+    color 0.16s var(--ease),
+    transform 0.22s var(--spring),
+    box-shadow 0.16s var(--ease);
+}
+.editor__actions button:hover:not(:disabled) {
   background: #fff;
-  border-radius: 6px;
+  color: var(--coral-deep);
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 6px 14px -6px rgba(255, 126, 176, 0.6);
+}
+.editor__remove:hover:not(:disabled) {
+  color: var(--danger) !important;
 }
 
-.editor__remove {
-  color: #b91c1c;
-}
-
-/* Pickers */
+/* ---------- Pickers ---------- */
 .picker {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
-
 .picker__chip {
-  padding: 8px 14px;
-  border: 2px solid var(--border);
+  padding: 10px 20px;
+  font-family: var(--quick);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.75);
   border-radius: 999px;
-  background: #fff;
+  transition:
+    border-color 0.16s var(--ease),
+    background 0.16s var(--ease),
+    color 0.16s var(--ease),
+    transform 0.24s var(--spring),
+    box-shadow 0.2s var(--ease);
 }
-
+.picker__chip:hover {
+  transform: translateY(-2px);
+  color: var(--coral-deep);
+  border-color: rgba(255, 145, 190, 0.6);
+}
+/* テンプレチップは inline background/color を持つため、選択は枠＋グローで示す。
+   アスペクトチップ (inline 無し) はグラデ塗りになる。 */
 .picker__chip--active {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(196, 94, 134, 0.2);
+  color: #fff;
+  background: linear-gradient(135deg, var(--coral), var(--peach));
+  border-color: #fff;
+  box-shadow:
+    0 0 0 2px var(--coral),
+    0 10px 22px -8px rgba(255, 126, 176, 0.75);
 }
 
-/* Preview */
+/* ---------- Preview ---------- */
 .preview {
-  margin: 16px 0;
+  margin: 22px 0 0;
   text-align: center;
 }
-
 .preview__canvas {
   max-width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
-  background: #eef1f4;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #fff2f6, #ffe6ef);
+  /* box-shadow で白マット＋グローの“額装”を表現 (レイアウトに影響しない) */
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.9),
+    0 0 0 10px rgba(255, 255, 255, 0.55),
+    0 18px 44px -10px rgba(220, 110, 160, 0.4);
 }
-
 .preview__caption {
-  margin: 8px 0 0;
-  font-size: 0.8rem;
-  color: #7b8794;
+  margin: 22px 0 0;
+  font-family: var(--quick);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-3);
 }
 
-/* Export */
+/* ---------- Export ---------- */
 .export__format {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  margin: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: none;
 }
-
 .export__format legend {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #52606d;
+  flex-basis: 100%;
+  padding: 0;
+  margin-bottom: 9px;
+  font-family: var(--quick);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-2);
 }
-
 .export__format label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 17px;
+  font-family: var(--quick);
   font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    border-color 0.16s var(--ease),
+    background 0.16s var(--ease),
+    color 0.16s var(--ease);
+}
+.export__format label:hover {
+  border-color: rgba(255, 145, 190, 0.6);
+  color: var(--coral-deep);
+}
+.export__format input[type="radio"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--coral);
+  cursor: pointer;
+}
+.export__format label:has(input:checked) {
+  color: var(--coral-deep);
+  background: rgba(255, 230, 240, 0.85);
+  border-color: var(--coral);
 }
 
 .export__buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 12px;
+  gap: 12px;
+  margin-top: 18px;
 }
-
 .export__buttons button {
   flex: 1;
-  min-width: 140px;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #fff;
-  font-weight: 600;
+  min-width: 150px;
+  padding: 15px;
+  font-family: var(--quick);
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--coral-deep);
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  transition:
+    transform 0.28s var(--spring),
+    box-shadow 0.2s var(--ease),
+    filter 0.2s var(--ease),
+    background 0.2s var(--ease);
 }
-
+.export__buttons button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
 .export__primary {
-  background: var(--accent) !important;
-  color: #fff;
-  border-color: var(--accent) !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--coral), var(--peach)) !important;
+  border: none !important;
+  box-shadow: 0 14px 28px -10px rgba(255, 126, 176, 0.85) !important;
+}
+.export__primary:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.02);
+  filter: brightness(1.05);
 }
 
 .export__error {
-  color: #b91c1c;
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  color: var(--danger);
   font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(232, 83, 126, 0.08);
+  border: 1px solid rgba(232, 83, 126, 0.25);
+  border-radius: var(--radius-xs);
 }
 
 .export__guide {
-  margin: 12px 0 0;
-  padding-left: 1.2em;
+  margin: 14px 0 0;
+  padding: 14px 16px 14px 32px;
   font-size: 0.85rem;
-  color: #52606d;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-sm);
+}
+.export__guide li {
+  margin: 3px 0;
 }
 
+/* ---------- Footer ---------- */
 .app__footer {
-  margin-top: 32px;
+  margin-top: 44px;
   text-align: center;
-  font-size: 0.8rem;
-  color: #7b8794;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-3);
 }

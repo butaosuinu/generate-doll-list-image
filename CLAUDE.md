@@ -67,4 +67,4 @@ React 19 (関数コンポーネント + hooks のみ) + Vite + TypeScript (stric
 - **完全クライアントサイド**: バックエンド・外部 API 送信なし。画像はサーバーに出さない。
 - **アセットパス**: ハードコードした絶対パス (`/assets/...`) は使わない。GitHub Pages では base が変わるため、`import` するか `import.meta.env.BASE_URL` を経由する。さもないと公開時 404 になる。
 - **GitHub Pages デプロイ**: `main` への push で `.github/workflows/deploy.yml` が自動デプロイ。CI では `GITHUB_PAGES=true` が立ち、Vite の base がリポジトリ名 (`/generate-doll-list-image/`) になる。ローカルでは `/`。
-- **背景テンプレート画像**: `codex imagegen` で生成し、3 アスペクト比分を `public/templates/<id>-16x9.png` (1600×900) / `<id>-4x5.png` (1080×1350) / `<id>-1x1.png` (1080×1080) に置く。グリッドは中央寄せなので、背景は中央を空け縁を装飾する。`backgroundColor` だけでも (画像なしで) 成立する。
+- **背景テンプレート画像**: Codex の imagegen スキル (組み込み `image_gen` ツール / `codex exec` 経由。`codex imagegen` という CLI サブコマンドは存在しない) で生成し、3 アスペクト比分を `public/templates/<id>-16x9.jpg` (1600×900) / `<id>-4x5.jpg` (1080×1350) / `<id>-1x1.jpg` (1080×1080) に置く。生成は近い向き (横長/縦長/正方) で出力 → mac 標準 `sips` で「幅リサンプル → 中央クロップ」して正確な寸法に正規化 → 装飾背景なので `sips -s format jpeg` で JPEG 化して軽量化 (各 ~数百 KB)。参照拡張子は `makeVariants()` 側 (`.jpg`) と一致させること。グリッドは中央寄せなので、背景は中央を空け縁を装飾する。`backgroundColor` だけでも (画像なしで) 成立する。

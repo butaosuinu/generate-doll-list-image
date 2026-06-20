@@ -9,7 +9,7 @@ const DIMENSIONS: Record<AspectKey, { width: number; height: number; file: strin
 };
 
 /**
- * 各アスペクトの variant を生成。背景画像は public/templates/<id>-<aspect>.png を参照し、
+ * 各アスペクトの variant を生成。背景画像は public/templates/<id>-<aspect>.jpg を参照し、
  * 未配置なら loadBackground が null を返して backgroundColor にフォールバックする。
  * 縦長・正方形はタイトル/余白を詰めるため area をやや広げる。
  */
@@ -17,17 +17,17 @@ function makeVariants(id: string): Record<AspectKey, AspectVariant> {
   return {
     "16:9": {
       ...sizeOf("16:9"),
-      background: `templates/${id}-16x9.png`,
+      background: `templates/${id}-16x9.jpg`,
       layout: { area: { x: 0.06, y: 0.17, w: 0.88, h: 0.76 } },
     },
     "4:5": {
       ...sizeOf("4:5"),
-      background: `templates/${id}-4x5.png`,
+      background: `templates/${id}-4x5.jpg`,
       layout: { area: { x: 0.06, y: 0.13, w: 0.88, h: 0.81 } },
     },
     "1:1": {
       ...sizeOf("1:1"),
-      background: `templates/${id}-1x1.png`,
+      background: `templates/${id}-1x1.jpg`,
       layout: { area: { x: 0.06, y: 0.15, w: 0.88, h: 0.79 } },
     },
   };
